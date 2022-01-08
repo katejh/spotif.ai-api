@@ -2,6 +2,9 @@ from math import sqrt
 import requests
 import string
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def get_vector_distance(v1, v2) -> float:
     sum = 0
