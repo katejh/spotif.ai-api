@@ -32,6 +32,9 @@ Activate the server with `python manage.py runserver`.
 ## Contributors
 
 [Akash](https://github.com/Akash2002)
+
 [Evan](https://github.com/Evanyl)
+
 [Kate](https://github.com/katejh)
+
 [Prayus](https://github.com/PrayusShrestha)
