@@ -24,11 +24,7 @@ def convert_text_to_vector(text: str):
 
     return r["vector"]
 
-def get_phrase_and_song_similarity(phrase: str, song_id: str) -> float:
-    # get song lyrics from scraping
-    song_lyrics = "the cold never bothered me anyway"
-    
-
+def get_phrase_and_song_similarity(phrase: str, song_lyrics: str) -> float:
     # convert to vectors
     phrase_vector = convert_text_to_vector(phrase)
     lyrics_vector = convert_text_to_vector(song_lyrics)
