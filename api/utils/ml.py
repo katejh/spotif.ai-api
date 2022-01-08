@@ -5,9 +5,9 @@ import os
 
 def get_vector_distance(v1, v2) -> float:
     distance1squared = sum(x**2 for x in v1)
-    distance2sqarued = sum(x**2 for x in v2)
+    distance2squared = sum(x**2 for x in v2)
 
-    return sqrt(distance1 - distance2)
+    return sqrt(distance1squared - distance2squared)
 
 def convert_text_to_vector(text: str):
     data = {"text": text}
