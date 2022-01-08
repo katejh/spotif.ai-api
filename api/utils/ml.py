@@ -4,10 +4,10 @@ import string
 import os
 
 def get_vector_distance(v1, v2) -> float:
-    distance1 = sqrt(sum(x**2 for x in v1))
-    distance2 = sqrt(sum(x**2 for x in v2))
+    distance1squared = sum(x**2 for x in v1)
+    distance2sqarued = sum(x**2 for x in v2)
 
-    return distance1 - distance2
+    return sqrt(distance1 - distance2)
 
 def convert_text_to_vector(text: str):
     data = {"text": text}
