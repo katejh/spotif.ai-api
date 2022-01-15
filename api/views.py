@@ -27,10 +27,16 @@ def login(request):
     params = {
         "response_type": "code",
         "client_id": "dfda70caf6ae465a95ce18a61dc47623",
-        "redirect_url": "https://localhost:8000/",
-        "scope": "user-read-private user-read-email"
+        "redirect_url": "https://localhost:8000/login",
+        "scope": "user-read-private user-read-email",
+        "show_dialog": True
     }
 
     response = requests.request(
-        "GET", url="https://accounts.spotify.com/authorize", params=params, )
-    return Response(response)
+        "GET", url="https://accounts.spotify.com/authorize", params=params)
+
+
+@api_view(["GET"])
+def provide_auth_token(request):
+
+    return Response(request.GET.get("auth_token"))

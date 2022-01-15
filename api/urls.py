@@ -22,5 +22,5 @@ urlpatterns = [
     path('api/', views.dummy),
     path('api/dummy-get/<int:num>/', views.dummy_get),
     path('api/dummy-post/', views.dummy_post),
-    path('login/', views.login)
+    path('provide_auth_token/', views.provide_auth_token)
 ]
