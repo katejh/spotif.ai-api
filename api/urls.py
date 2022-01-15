@@ -16,11 +16,11 @@ Including another URLconf
 
 from django.urls import include, path
 from . import views
- 
 
 
 urlpatterns = [
     path('api/', views.dummy),
     path('api/dummy-get/<int:num>/', views.dummy_get),
     path('api/dummy-post/', views.dummy_post),
+    path('login/', views.login)
 ]
