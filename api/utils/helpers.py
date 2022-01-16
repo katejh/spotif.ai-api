@@ -12,6 +12,8 @@ class Song:
         self.artist_id = data["artists"][0]["id"]
         self.name = data["name"]
         self.id = data["id"]
+        self.external_url = data["external_urls"]["spotify"]
+        self.album_image_url = data["album"]["images"][0]["url"]
 
     def json(self):
         """returns dict of object data in json format
@@ -21,7 +23,9 @@ class Song:
             "artist_name": self.artist_name,
             "artist_id": self.artist_id,
             "name": self.name,
-            "id": self.id
+            "id": self.id,
+            "album_image_url": self.album_image_url,
+            "external_url": self.external_url
         }
 
 
@@ -68,7 +72,7 @@ def get_user_playlists(token: str):
         songs = []
         for item in song_info["items"]:
             song = Song(item["track"])
-            print(song.name)
+            # print(song.name)
             songs.append(song.json())
 
         playlists.append({
@@ -97,8 +101,6 @@ def get_user_songs(token: str):
 
     for item in tracks_response_json["items"]:
         song = Song(item["track"])
-        bruh = song.json()
-        print(bruh["name"])
         songs.append(song.json())
 
     return songs, 200
@@ -122,7 +124,21 @@ def get_song_suggestions(token: str, seed_tracks, seed_artists):
     songs = []
 
     for track in suggestions_response_json["tracks"]:
-        song = Song(track)
+        song = get_song_data(track["id"], token)
         songs.append(song.json())
 
     return songs, 200
+
+def get_song_data(song_id: str, token: str):
+    # print(song_id)
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {token}'
+    }
+
+    res = requests.get(f"https://api.spotify.com/v1/tracks/{song_id}", headers=headers)
+    # print(res)
+    res = res.json()
+    # print(res)
+    
+    return Song(res)
