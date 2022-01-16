@@ -83,9 +83,14 @@ def get_songs(request):
         for item in song_info["items"]:
             song_artist = item["track"]["artists"][0]["name"]
             song_name = item["track"]["name"]
+            external_url = item["track"]["external_urls"]["spotify"]
+            album = item["track"]["images"][0]
+
             songs.append({
                 "artist": song_artist,
-                "name": song_name
+                "name": song_name,
+                "external_url": external_url,
+                "album": album
             })
 
         playlists.append({
