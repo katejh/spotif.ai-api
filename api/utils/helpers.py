@@ -1,4 +1,5 @@
 import requests
+from rest_framework.response import Response
 
 class Song:
     def __init__(self, data: dict):
@@ -66,7 +67,49 @@ def get_user_playlists(token: str):
             songs.append(song.json())
 
         playlists.append({
-            name: songs
+            "name": name,
+            "songs": songs
         })
     
     return playlists
+
+def get_user_songs(token: str):
+    headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {token}'
+    }
+
+    tracks_response = requests.get("https://api.spotify.com/v1/me/tracks", headers=headers)
+    tracks_response_json = tracks_response.json()
+
+    songs = []
+
+    for item in tracks_response_json["items"]:
+        song = Song(item["track"])
+        songs.append(song.json())
+
+    return songs
+
+def get_song_suggestions(token: str, seed_tracks, seed_artists):
+    headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {token}'
+    }
+
+    params = {
+        "seed_tracks": seed_tracks,
+        "seed_artists": seed_artists
+    }
+
+    suggestions_response = requests.get("https://api.spotify.com/v1/recommendations", headers=headers)
+    suggestions_response_json = suggestions_response.json()
+
+    songs = []
+
+    for track in suggestions_response_json["tracks"]:
+        song = Song(track)
+        songs.append(song.json())
+
+    return songs

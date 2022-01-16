@@ -9,6 +9,7 @@ import os
 import random
 from utils.scrappers import get_lyrics, clean_text
 from utils.ml import is_phrase_and_song_similar
+from utils.helpers import get_user_playlists, get_user_songs, get_song_suggestions
 
 load_dotenv()
 
@@ -57,64 +58,15 @@ def provide_auth_token(request):
 
 @api_view(["POST"])
 def get_songs(request):
-<<<<<<< HEAD
-    token = request.token
-=======
-    playlists = fetch_songs_from_playlists()
-
-    return Response(data={"playlists": playlists}, status=200)
-
-def fetch_songs_from_playlists():
-    token = os.environ.get("SPOTIFY_BEARER_TOKEN")
->>>>>>> ml created playlist prototype because the last commit was wack
-    
-    headers = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': f'Bearer {token}'
-    }
-
-    response = requests.get("https://api.spotify.com/v1/me/playlists", headers=headers)
-
-    if not response:
-        return Response(data="Could not get playlists", status=502)
-
-    information = response.json()
-
-    playlists = []
-
-    for playlist in information["items"]:
-        id = playlist["id"]
-        name = playlist["name"]
-
-        song_response = requests.get(f"https://api.spotify.com/v1/playlists/{id}/tracks?market=US", headers=headers)
-
-        if not song_response:
-            return Response(data="Could not get song response", status=502)
-
-        song_info = song_response.json()
-
-        songs = []
-        for item in song_info["items"]:
-            song_artist = item["track"]["artists"][0]["name"]
-            song_name = item["track"]["name"]
-            song_id = item["track"]["id"]
-            song_artist_id = item["track"]["artists"][0]["id"]
-            songs.append({
-                "artist": song_artist,
-                "name": song_name,
-                "id": song_id,
-                "artist_id": song_artist_id
-            })
-
-        playlists.append({
-            name: songs
-        })
+    playlists = get_user_playlists(request.data.token)
     
     return playlists
 
-def create_playlist(phrase, limit=50):
-    token = os.environ.get("SPOTIFY_BEARER_TOKEN")
+@api_view(["POST"])
+def create_playlist(request):
+    token = request.data.token
+    phrase = request.data.phrase
+    limit = request.data.limit if request.data.limit else 50
 
     headers = {
         'Accept': 'application/json',
@@ -122,49 +74,21 @@ def create_playlist(phrase, limit=50):
         'Authorization': f'Bearer {token}'
     }
 
-    playlists = fetch_songs_from_playlists()
-
     songs = []
 
+    playlists = get_user_playlists(token)
+    user_tracks = get_user_songs(token)
+    suggestions = get_song_suggestions(token, seed_tracks=[random.choice(songs)["id"] for i in range(3)], seed_artists=[random.choice(songs)["artist_id"] for i in range(2)])
+
     for playlist in playlists:
-        for song in playlist[list(playlist.keys())[0]]:
+        for song in playlist["songs"]:
             songs.append(song)
 
-    tracks_response = requests.get("https://api.spotify.com/v1/me/tracks", headers=headers)
-    tracks_response_json = tracks_response.json()
+    for track in user_tracks:
+        songs.append(track)
 
-    for song in tracks_response_json["items"]:
-        song_artist = song["track"]["artists"][0]["name"]
-        song_artist_id = song["track"]["artists"][0]["id"]
-        song_name = song["track"]["name"]
-        song_id = song["track"]["id"]
-        songs.append({
-            "artist": song_artist,
-            "name": song_name,
-            "id": song_id,
-            "artist_id": song_artist_id
-        })
-
-    # get some recommended songs too
-    params = {
-        "seed_tracks": [random.choice(songs)["id"] for i in range(3)],
-        "seed_artists": [random.choice(songs)["artist_id"] for i in range(2)]
-    }
-
-    suggestions_response = requests.get("https://api.spotify.com/v1/recommendations", headers=headers)
-    suggestions_response_json = suggestions_response.json()
-
-    for song in suggestions_response_json["tracks"]:
-        artist = song["artists"][0]["name"]
-        artist_id = song["artists"][0]["id"]
-        name = song["name"]
-        id = song["id"]
-        songs.append({
-            "artist": artist,
-            "artist_id": artist_id,
-            "name": name,
-            "id": id
-        })
+    for track in suggestions:
+        songs.append(track)
 
     matching_songs = []
 
