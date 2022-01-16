@@ -57,7 +57,9 @@ def get_similar_songs(phrase: str, song_lyrics: str, threshold: float, limit=50)
             indices.append(i)
             print(f"added song {i}, {count} songs added so far")
 
-            if count >= threshold:
+            count += 1
+
+            if count >= limit:
                 break
 
     return indices

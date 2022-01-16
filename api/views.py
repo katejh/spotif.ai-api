@@ -9,7 +9,8 @@ import os
 import random
 from .utils.scrappers import get_lyrics, clean_text
 from .utils.ml import get_similar_songs
-from .utils.helpers import get_user_playlists, get_user_songs, get_song_suggestions
+from .utils.helpers import get_user_playlists, get_user_songs, get_song_suggestions, get_user_id
+import json
 
 load_dotenv()
 
@@ -100,21 +101,83 @@ def create_playlist(request):
     for track in suggestions:
         songs.append(track)
 
+    songs_suggestions_weighted = [] # array with combined existing songs and suggested songs, with weight for each
+    
+    total_songs = len(songs) + len(suggestions)
+
+    for song in songs:
+        if random.randint(0,total_songs) <= 0.25 * total_songs:
+            songs_suggestions_weighted.append(song)
+
+    for song in suggestions:
+        if random.randint(0,total_songs) <= 0.75 * total_songs:
+            songs_suggestions_weighted.append(song)
+
     matching_songs = []
     count = 0
 
     lyrics = []
+    titles = []
 
     print('did we get here')
-    for song in songs:
-        lyrics.append(get_lyrics(song["name"], song["artist_name"]))
+    random.shuffle(songs_suggestions_weighted)
+    for song in songs_suggestions_weighted:
+        # lyrics.append(get_lyrics(song["name"], song["artist_name"]))
+        titles.append(song["name"])
 
     print('did we get here')
 
-    matching_indices = get_similar_songs(clean_text(phrase), lyrics, 1.0, limit)
+    matching_indices = get_similar_songs(clean_text(phrase), titles, 1.25, limit)
 
     for i in matching_indices:
-        matching_songs.append(songs[i])
+        matching_songs.append(songs_suggestions_weighted[i])
 
-    random.shuffle(matching_songs)
     return Response(data=matching_songs, status=200)
+
+@api_view(["POST"])
+def playlist(request):
+    token = request.data.get("token")
+    user_id = get_user_id(token)
+    playlist_name = request.data.get("playlist_name")
+    playlist_description = request.data.get("description")
+    songs = request.data.get("songs")
+    print(songs)
+
+    payload = json.dumps({
+        "name": playlist_name,
+        "description": playlist_description,
+        "public": False
+    })
+
+    headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {token}',
+    }
+
+    response = requests.request(
+        "POST", f"https://api.spotify.com/v1/users/{user_id}/playlists", headers=headers, data=payload)
+
+    if not response:
+        return Response(data="Could not create a playlist", status=502)
+
+    info = response.json()
+    playlist_id = info["id"]
+
+    #songs = songs.replace(":", "%3A")
+    #songs = songs.replace(",", "%2C")
+    songQuery = ",".join(songs)
+
+    headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {token}',
+    }
+
+    response = requests.request(
+        "POST", f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks?uris={songQuery}", headers=headers, data={})
+    if not response:
+        print(response.text)
+        return Response("failure", 502)
+    return Response("success", 200)
+
