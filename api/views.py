@@ -10,6 +10,7 @@ import random
 from .utils.scrappers import get_lyrics, clean_text
 from .utils.ml import get_similar_songs
 from .utils.helpers import get_user_playlists, get_user_songs, get_song_suggestions
+import json
 
 load_dotenv()
 
@@ -132,3 +133,48 @@ def create_playlist(request):
         matching_songs.append(songs_suggestions_weighted[i])
 
     return Response(data=matching_songs, status=200)
+
+@api_view(["POST"])
+def playlist(request):
+    token = request.data.get("token")
+    user_id = request.data.get("user_id")
+    playlist_name = request.data.get("playlist_name")
+    playlist_description = request.data.get("description")
+    songs = request.data.get("songs")
+
+    payload = json.dumps({
+        "name": playlist_name,
+        "description": playlist_description,
+        "public": False
+    })
+
+    headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {token}',
+    }
+
+    response = requests.request(
+        "POST", f"https://api.spotify.com/v1/users/{user_id}/playlists", headers=headers, data=payload)
+
+    if not response:
+        return Response(data="Could not create a playlist", status=502)
+
+    info = response.json()
+    playlist_id = info["id"]
+
+    songs = songs.replace(":", "%3A")
+    songs = songs.replace(",", "%2C")
+
+    headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {token}',
+    }
+
+    response = requests.request(
+        "POST", f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks?uris={songs}", headers=headers, data={})
+    if not response:
+        print(response.text)
+        return Response("failure", 502)
+    return Response("success", 200)
