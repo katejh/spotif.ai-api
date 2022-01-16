@@ -31,8 +31,8 @@ def get_phrase_and_song_similarity(phrase: str, song_lyrics: str) -> float:
 
     return abs(get_vector_distance(phrase_vector, lyrics_vector))
 
-def is_phrase_and_song_similar(phrase: str, song_id: str, threshold: float) -> bool:
-    if (get_phrase_and_song_similarity(phrase, song_id) <= threshold):
+def is_phrase_and_song_similar(phrase: str, song_lyrics: str, threshold: float) -> bool:
+    if (get_phrase_and_song_similarity(phrase, song_lyrics) <= threshold):
         return True
 
     return False
