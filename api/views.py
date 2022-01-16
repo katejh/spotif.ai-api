@@ -9,6 +9,7 @@ import os
 
 load_dotenv()
 
+
 @api_view(['GET'])
 def dummy(request):
     return Response(200)
@@ -25,10 +26,9 @@ def dummy_post(request):
     token = request.data.get("token")
     response = f"you said {prompt} and {token}"
     print(response)
-    
-    dummy_data = {"songs": [1,2,3,4]}
-    
-    
+
+    dummy_data = {"songs": [1, 2, 3, 4]}
+
     return Response(dummy_data)
 
 
@@ -43,26 +43,22 @@ def login(request):
         "show_dialog": True
     }
 
-    response = requests.get(url="https://accounts.spotify.com/authorize", params=params)
-
-
-@api_view(["GET"])
-def provide_auth_token(request):
-    global auth_token
-    auth_token = request.GET.get("auth_token")
+    response = requests.get(
+        url="https://accounts.spotify.com/authorize", params=params)
 
 
 @api_view(["POST"])
 def get_songs(request):
-    token = request.token
-    
+    token = request.data.token
+
     headers = {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {token}'
     }
 
-    response = requests.get("https://api.spotify.com/v1/me/playlists", headers=headers)
+    response = requests.get(
+        "https://api.spotify.com/v1/me/playlists", headers=headers)
 
     if not response:
         return Response(data="Could not get playlists", status=502)
@@ -75,7 +71,8 @@ def get_songs(request):
         id = playlist["id"]
         name = playlist["name"]
 
-        song_response = requests.get(f"https://api.spotify.com/v1/playlists/{id}/tracks?market=US", headers=headers)
+        song_response = requests.get(
+            f"https://api.spotify.com/v1/playlists/{id}/tracks?market=US", headers=headers)
 
         if not song_response:
             return Response(data="Could not get song response", status=502)
