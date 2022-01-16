@@ -64,7 +64,7 @@ def get_user_playlists(token: str):
             return Response(data="Could not get song response", status=502)
 
         song_info = song_response.json()
-
+        
         songs = []
         for item in song_info["items"]:
             song = Song(item["track"])
