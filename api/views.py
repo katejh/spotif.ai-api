@@ -33,21 +33,6 @@ def dummy_post(request):
     return Response(dummy_data)
 
 
-@api_view(["GET"])
-def login(request):
-
-    params = {
-        "response_type": "code",
-        "client_id": "dfda70caf6ae465a95ce18a61dc47623",
-        "redirect_url": "https://localhost:8000/login",
-        "scope": "user-read-private user-read-email",
-        "show_dialog": True
-    }
-
-    response = requests.get(
-        url="https://accounts.spotify.com/authorize", params=params)
-
-
 @api_view(["POST"])
 def create_playlist(request):
     token = request.data.get("token")
