@@ -104,14 +104,16 @@ def create_playlist(request):
     count = 0
 
     lyrics = []
+    titles = []
 
     print('did we get here')
     for song in songs:
-        lyrics.append(get_lyrics(song["name"], song["artist_name"]))
+        # lyrics.append(get_lyrics(song["name"], song["artist_name"]))
+        titles.append(song["name"])
 
     print('did we get here')
 
-    matching_indices = get_similar_songs(clean_text(phrase), lyrics, 1.0, limit)
+    matching_indices = get_similar_songs(clean_text(phrase), titles, 1.3, limit)
 
     for i in matching_indices:
         matching_songs.append(songs[i])
