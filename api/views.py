@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 import os
 import random
 from .utils.scrappers import get_lyrics, clean_text
-from .utils.ml import is_phrase_and_song_similar
+from .utils.ml import get_similar_songs
 from .utils.helpers import get_user_playlists, get_user_songs, get_song_suggestions
 
 load_dotenv()
@@ -84,6 +84,8 @@ def create_playlist(request):
     playlists, status = get_user_playlists(token)
     user_tracks, status = get_user_songs(token)
 
+    print('did we get here')
+
     # print(playlists)
     for playlist in playlists:
         # print(playlist)
@@ -94,23 +96,25 @@ def create_playlist(request):
         songs.append(track)
 
     suggestions, status = get_song_suggestions(token, seed_tracks=[random.choice(songs)["id"] for i in range(3)], seed_artists=[random.choice(songs)["artist_id"] for i in range(2)])
-
+    print('did we get here')
     for track in suggestions:
         songs.append(track)
 
     matching_songs = []
     count = 0
 
+    lyrics = []
+
+    print('did we get here')
     for song in songs:
-        # through tests threshold of 1 seems good
-        lyrics = get_lyrics(song["name"], song["artist_name"])
-        print(f"analyzing {song['name']}")
-        if is_phrase_and_song_similar(clean_text(phrase), lyrics, 1.0):
-            print(f"adding {song['name']}")
-            matching_songs.append(song)
-            count += 1
-        if count >= limit:
-            break
+        lyrics.append(get_lyrics(song["name"], song["artist_name"]))
+
+    print('did we get here')
+
+    matching_indices = get_similar_songs(clean_text(phrase), lyrics, 1.0, limit)
+
+    for i in matching_indices:
+        matching_songs.append(songs[i])
 
     random.shuffle(matching_songs)
     return Response(data=matching_songs, status=200)

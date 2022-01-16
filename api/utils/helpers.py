@@ -68,6 +68,7 @@ def get_user_playlists(token: str):
         songs = []
         for item in song_info["items"]:
             song = Song(item["track"])
+            print(song.name)
             songs.append(song.json())
 
         playlists.append({
@@ -85,6 +86,10 @@ def get_user_songs(token: str):
     }
 
     tracks_response = requests.get("https://api.spotify.com/v1/me/tracks", headers=headers)
+
+    if not tracks_response:
+        return "Could not get songs", 502
+
     tracks_response_json = tracks_response.json()
     # print(tracks_response_json)
 
@@ -92,6 +97,8 @@ def get_user_songs(token: str):
 
     for item in tracks_response_json["items"]:
         song = Song(item["track"])
+        bruh = song.json()
+        print(bruh["name"])
         songs.append(song.json())
 
     return songs, 200
