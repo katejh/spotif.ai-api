@@ -9,7 +9,7 @@ import os
 import random
 from .utils.scrappers import get_lyrics, clean_text
 from .utils.ml import get_similar_songs
-from .utils.helpers import get_user_playlists, get_user_songs, get_song_suggestions
+from .utils.helpers import get_user_playlists, get_user_songs, get_song_suggestions, get_user_id
 import json
 
 load_dotenv()
@@ -137,7 +137,8 @@ def create_playlist(request):
 @api_view(["POST"])
 def playlist(request):
     token = request.data.get("token")
-    user_id = request.data.get("user_id")
+    user_id = get_user_id()
+    print(user_id)
     playlist_name = request.data.get("playlist_name")
     playlist_description = request.data.get("description")
     songs = request.data.get("songs")

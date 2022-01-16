@@ -146,3 +146,15 @@ def get_song_data(song_id: str, token: str):
     # print(res)
     
     return Song(res)
+
+def get_user_id(token: str):
+    headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {token}'
+    }
+
+    res = requests.get(f"https://api.spotify.com/v1/me", headers=headers)
+    res = res.json()
+
+    return res.id
