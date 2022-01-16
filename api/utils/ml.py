@@ -59,7 +59,7 @@ def get_similar_songs(phrase: str, song_lyrics: str, threshold: float, limit=50)
 
             count += 1
 
-            if count >= threshold:
+            if count >= limit:
                 break
 
     return indices

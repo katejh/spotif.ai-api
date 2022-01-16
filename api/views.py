@@ -100,6 +100,18 @@ def create_playlist(request):
     for track in suggestions:
         songs.append(track)
 
+    songs_suggestions_weighted = [] # array with combined existing songs and suggested songs, with weight for each
+    
+    total_songs = len(songs) + len(suggestions)
+
+    for song in songs:
+        if random.randint(0,total_songs) <= 0.25 * total_songs:
+            songs_suggestions_weighted.append(song)
+
+    for song in suggestions:
+        if random.randint(0,total_songs) <= 0.75 * total_songs:
+            songs_suggestions_weighted.append(song)
+
     matching_songs = []
     count = 0
 
@@ -107,7 +119,8 @@ def create_playlist(request):
     titles = []
 
     print('did we get here')
-    for song in songs:
+    random.shuffle(songs_suggestions_weighted)
+    for song in songs_suggestions_weighted:
         # lyrics.append(get_lyrics(song["name"], song["artist_name"]))
         titles.append(song["name"])
 
@@ -116,7 +129,6 @@ def create_playlist(request):
     matching_indices = get_similar_songs(clean_text(phrase), titles, 1.3, limit)
 
     for i in matching_indices:
-        matching_songs.append(songs[i])
+        matching_songs.append(songs_suggestions_weighted[i])
 
-    random.shuffle(matching_songs)
     return Response(data=matching_songs, status=200)
