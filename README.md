@@ -4,9 +4,8 @@ Type in any text, and spotif.ai analyzes your phrase and creates a Spotify playl
 
 Built for nwHacks 2022
 
-This is the repo for the backend server of spotif.ai
+This is the repo for the backend code of spotif.ai. View the frontend code [here](https://github.com/Evanyl/spotifai-front)!
 
-See the [frontend](https://github.com/Evanyl/spotifai-front)!
 
 ## Technologies
 
