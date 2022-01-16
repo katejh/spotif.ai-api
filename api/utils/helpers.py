@@ -14,6 +14,7 @@ class Song:
         self.id = data["id"]
         self.external_url = data["external_urls"]["spotify"]
         self.album_image_url = data["album"]["images"][0]["url"]
+        self.uri = data["uri"]
 
     def json(self):
         """returns dict of object data in json format
@@ -25,7 +26,8 @@ class Song:
             "name": self.name,
             "id": self.id,
             "album_image_url": self.album_image_url,
-            "external_url": self.external_url
+            "external_url": self.external_url,
+            "uri": self.uri
         }
 
 
