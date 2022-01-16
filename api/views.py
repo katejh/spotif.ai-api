@@ -48,8 +48,14 @@ def login(request):
 
 
 @api_view(["POST"])
-def get_songs(request):
+def create_playlist(request):
     token = request.data.token
+    user_id = request.data.user_id
+
+
+@api_view(["POST"])
+def get_songs(request):
+    token = request.data.get("token")
 
     headers = {
         'Accept': 'application/json',
@@ -84,13 +90,15 @@ def get_songs(request):
             song_artist = item["track"]["artists"][0]["name"]
             song_name = item["track"]["name"]
             external_url = item["track"]["external_urls"]["spotify"]
-            album = item["track"]["images"][0]
+            album_image = item["track"]["album"]["images"][0]
+            uri = item["track"]["uri"]
 
             songs.append({
                 "artist": song_artist,
                 "name": song_name,
                 "external_url": external_url,
-                "album": album
+                "album_image": album_image,
+                "uri": uri
             })
 
         playlists.append({
