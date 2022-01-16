@@ -58,15 +58,20 @@ def provide_auth_token(request):
 
 @api_view(["POST"])
 def get_songs(request):
-    playlists = get_user_playlists(request.data.token)
+    playlists = get_user_playlists(request.data.get('token'))
     
     return playlists
 
 @api_view(["POST"])
 def create_playlist(request):
-    token = request.data.token
-    phrase = request.data.phrase
-    limit = request.data.limit if request.data.limit else 50
+    token = request.data.get('token')
+    phrase = request.data.get('phrase')
+    limit = 50
+
+    try:
+        limit = int(request.data.get('limit'))
+    except:
+        None
 
     headers = {
         'Accept': 'application/json',

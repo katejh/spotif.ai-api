@@ -42,11 +42,14 @@ def get_user_playlists(token: str):
     }
 
     response = requests.get("https://api.spotify.com/v1/me/playlists", headers=headers)
+    response = response.json()
 
     if not response:
         return Response(data="Could not get playlists", status=502)
 
-    information = response.json()
+    information = response
+
+    print(information)
 
     playlists = []
 
