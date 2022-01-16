@@ -7,9 +7,9 @@ import requests
 from dotenv import load_dotenv
 import os
 import random
-from utils.scrappers import get_lyrics, clean_text
-from utils.ml import is_phrase_and_song_similar
-from utils.helpers import get_user_playlists, get_user_songs, get_song_suggestions
+from .utils.scrappers import get_lyrics, clean_text
+from .utils.ml import is_phrase_and_song_similar
+from .utils.helpers import get_user_playlists, get_user_songs, get_song_suggestions
 
 load_dotenv()
 
