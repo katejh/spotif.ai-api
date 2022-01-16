@@ -19,6 +19,8 @@ In the root of this repository, create a virtual Python environment with `python
 
 Activate your virtual environment by running `source venv/bin/activate`.
 
+If you're on windows you'll have to run `source venv/Scripts/activate`.
+
 Run `pip install -r requirements.txt`
 
 Create a `.env` file. See `.env_template` for details on which environment variables you need.
