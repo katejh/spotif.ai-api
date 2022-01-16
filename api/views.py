@@ -78,7 +78,6 @@ def create_playlist(request):
 
     playlists = get_user_playlists(token)
     user_tracks = get_user_songs(token)
-    suggestions = get_song_suggestions(token, seed_tracks=[random.choice(songs)["id"] for i in range(3)], seed_artists=[random.choice(songs)["artist_id"] for i in range(2)])
 
     for playlist in playlists:
         for song in playlist["songs"]:
@@ -86,6 +85,8 @@ def create_playlist(request):
 
     for track in user_tracks:
         songs.append(track)
+
+    suggestions = get_song_suggestions(token, seed_tracks=[random.choice(songs)["id"] for i in range(3)], seed_artists=[random.choice(songs)["artist_id"] for i in range(2)])
 
     for track in suggestions:
         songs.append(track)
