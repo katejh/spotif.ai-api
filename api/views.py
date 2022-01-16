@@ -127,7 +127,7 @@ def create_playlist(request):
 
     print('did we get here')
 
-    matching_indices = get_similar_songs(clean_text(phrase), titles, 1.3, limit)
+    matching_indices = get_similar_songs(clean_text(phrase), titles, 1.25, limit)
 
     for i in matching_indices:
         matching_songs.append(songs_suggestions_weighted[i])
