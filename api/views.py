@@ -21,8 +21,15 @@ def dummy_get(request, num):
 
 @api_view(['POST'])
 def dummy_post(request):
-    uuid = request.data.get("number")
-    return Response(uuid)
+    prompt = request.data.get("prompt")
+    token = request.data.get("token")
+    response = f"you said {prompt} and {token}"
+    print(response)
+    
+    dummy_data = {"songs": [1,2,3,4]}
+    
+    
+    return Response(dummy_data)
 
 
 @api_view(["GET"])
@@ -41,14 +48,13 @@ def login(request):
 
 @api_view(["GET"])
 def provide_auth_token(request):
-
     global auth_token
     auth_token = request.GET.get("auth_token")
 
 
-@api_view(["GET"])
+@api_view(["POST"])
 def get_songs(request):
-    token = os.environ.get("SPOTIFY_BEARER_TOKEN")
+    token = request.token
     
     headers = {
         'Accept': 'application/json',
