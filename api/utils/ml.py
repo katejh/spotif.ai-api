@@ -8,32 +8,39 @@ load_dotenv()
 
 def get_vector_distance(v1, v2) -> float:
     sum = 0
+    print(v1)
+    print(v2)
+
     for i in range(512):
-        sum += (v1[i] - v2[i])**2
+        sum += (v1[0][i] - v2[0][i])**2
 
     return sqrt(sum)
 
 def convert_texts_to_vector(texts: str):
     # print(text)
-    data = {"text": texts}
+    data = {"texts": texts}
 
     r = requests.get(os.environ.get("COLAB_SERVER_URL") + "/vector", json=data)
-
+    print(r)
     r = r.json()
-
     print(r)
 
     return r["vectors"]
 
-def get_phrase_and_songs_similarity(phrase: str, song_lyrics: str) -> float:
+def get_phrase_and_songs_similarity(phrase: str, song_lyrics):
     # convert to vectors
-    phrase_vector = convert_texts_to_vector(phrase)[0]
+    phrase_vector = convert_texts_to_vector([phrase])[0]
     lyrics_vector = convert_texts_to_vector(song_lyrics)
+
+    print(lyrics_vector)
 
     distances = []
 
+    # print(phrase_vector)
+    # print(lyrics_vector)
+
     for lyric_vector in lyrics_vector:
-        distances.append(abs(get_vector_distance(phrase_vector, lyrics_vector)))
+        distances.append(abs(get_vector_distance(phrase_vector, lyric_vector)))
 
     return distances
 
