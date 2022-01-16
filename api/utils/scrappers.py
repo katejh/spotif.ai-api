@@ -4,7 +4,10 @@ from bs4 import BeautifulSoup
 import requests
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
+import nltk
 
+nltk.download('stopwords')
+nltk.download('punkt')
 
 load_dotenv()
 
@@ -14,7 +17,7 @@ def clean_text(text: str) -> str:
 
     cleaned_words = [w.lower() for w in word_tokens if not w.lower() in stop_words and w.isalnum()]
 
-    return cleaned_words
+    return " ".join(cleaned_words)
 
 def get_lyrics(song_title: str="", artist: str="") -> str:
 
@@ -25,9 +28,13 @@ def get_lyrics(song_title: str="", artist: str="") -> str:
     page = requests.get(url)
     soup = BeautifulSoup(page.text, 'html.parser')
 
-    lyrics = " ".join([line for line in soup.find_all(class_="row")[1].find_all("div")[2].find_all("div")[5].get_text().split("\n") if len(line) > 0 and (len(line) < 3 or (line[0] != "[" and line[-2:] != ":]"))])
+    try:
+        lyrics = " ".join([line for line in soup.find_all(class_="row")[1].find_all("div")[2].find_all("div")[5].get_text().split("\n") if len(line) > 0 and (len(line) < 3 or (line[0] != "[" and line[-2:] != ":]"))])
+    except:
+        # just give up
+        return ""
     
     cleaned_lyrics = clean_text(lyrics)
     
-    return " ".join(cleaned_lyrics)
+    return cleaned_lyrics
 

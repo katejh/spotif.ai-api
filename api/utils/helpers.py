@@ -42,14 +42,15 @@ def get_user_playlists(token: str):
     }
 
     response = requests.get("https://api.spotify.com/v1/me/playlists", headers=headers)
+    # print(response)
     response = response.json()
 
     if not response:
-        return Response(data="Could not get playlists", status=502)
+        return "Could not get playlists", 502
 
     information = response
 
-    print(information)
+    # print(information)
 
     playlists = []
 
@@ -74,7 +75,7 @@ def get_user_playlists(token: str):
             "songs": songs
         })
     
-    return playlists
+    return playlists, 200
 
 def get_user_songs(token: str):
     headers = {
@@ -85,6 +86,7 @@ def get_user_songs(token: str):
 
     tracks_response = requests.get("https://api.spotify.com/v1/me/tracks", headers=headers)
     tracks_response_json = tracks_response.json()
+    # print(tracks_response_json)
 
     songs = []
 
@@ -92,7 +94,7 @@ def get_user_songs(token: str):
         song = Song(item["track"])
         songs.append(song.json())
 
-    return songs
+    return songs, 200
 
 def get_song_suggestions(token: str, seed_tracks, seed_artists):
     headers = {
@@ -106,8 +108,9 @@ def get_song_suggestions(token: str, seed_tracks, seed_artists):
         "seed_artists": seed_artists
     }
 
-    suggestions_response = requests.get("https://api.spotify.com/v1/recommendations", headers=headers)
+    suggestions_response = requests.get("https://api.spotify.com/v1/recommendations", headers=headers, params=params)
     suggestions_response_json = suggestions_response.json()
+    # print(suggestions_response_json)
 
     songs = []
 
@@ -115,4 +118,4 @@ def get_song_suggestions(token: str, seed_tracks, seed_artists):
         song = Song(track)
         songs.append(song.json())
 
-    return songs
+    return songs, 200

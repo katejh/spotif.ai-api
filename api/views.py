@@ -58,9 +58,9 @@ def provide_auth_token(request):
 
 @api_view(["POST"])
 def get_songs(request):
-    playlists = get_user_playlists(request.data.get('token'))
+    playlists, status = get_user_playlists(request.data.get('token'))
     
-    return playlists
+    return Response(data=playlists, status=status)
 
 @api_view(["POST"])
 def create_playlist(request):
@@ -81,28 +81,36 @@ def create_playlist(request):
 
     songs = []
 
-    playlists = get_user_playlists(token)
-    user_tracks = get_user_songs(token)
+    playlists, status = get_user_playlists(token)
+    user_tracks, status = get_user_songs(token)
 
+    # print(playlists)
     for playlist in playlists:
+        # print(playlist)
         for song in playlist["songs"]:
             songs.append(song)
 
     for track in user_tracks:
         songs.append(track)
 
-    suggestions = get_song_suggestions(token, seed_tracks=[random.choice(songs)["id"] for i in range(3)], seed_artists=[random.choice(songs)["artist_id"] for i in range(2)])
+    suggestions, status = get_song_suggestions(token, seed_tracks=[random.choice(songs)["id"] for i in range(3)], seed_artists=[random.choice(songs)["artist_id"] for i in range(2)])
 
     for track in suggestions:
         songs.append(track)
 
     matching_songs = []
+    count = 0
 
     for song in songs:
         # through tests threshold of 1 seems good
-        lyrics = get_lyrics(song["name"], song["artist"])
+        lyrics = get_lyrics(song["name"], song["artist_name"])
+        print(f"analyzing {song['name']}")
         if is_phrase_and_song_similar(clean_text(phrase), lyrics, 1.0):
+            print(f"adding {song['name']}")
             matching_songs.append(song)
+            count += 1
+        if count >= limit:
+            break
 
     random.shuffle(matching_songs)
-    return matching_songs[:limit]
+    return Response(data=matching_songs, status=200)
