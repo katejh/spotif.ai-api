@@ -157,4 +157,4 @@ def get_user_id(token: str):
     res = requests.get(f"https://api.spotify.com/v1/me", headers=headers)
     res = res.json()
 
-    return res.id
+    return res["id"]

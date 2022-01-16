@@ -137,11 +137,11 @@ def create_playlist(request):
 @api_view(["POST"])
 def playlist(request):
     token = request.data.get("token")
-    user_id = get_user_id()
-    print(user_id)
+    user_id = get_user_id(token)
     playlist_name = request.data.get("playlist_name")
     playlist_description = request.data.get("description")
     songs = request.data.get("songs")
+    print(songs)
 
     payload = json.dumps({
         "name": playlist_name,
@@ -164,8 +164,9 @@ def playlist(request):
     info = response.json()
     playlist_id = info["id"]
 
-    songs = songs.replace(":", "%3A")
-    songs = songs.replace(",", "%2C")
+    #songs = songs.replace(":", "%3A")
+    #songs = songs.replace(",", "%2C")
+    songQuery = ",".join(songs)
 
     headers = {
         'Accept': 'application/json',
@@ -174,7 +175,7 @@ def playlist(request):
     }
 
     response = requests.request(
-        "POST", f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks?uris={songs}", headers=headers, data={})
+        "POST", f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks?uris={songQuery}", headers=headers, data={})
     if not response:
         print(response.text)
         return Response("failure", 502)
