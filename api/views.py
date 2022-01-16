@@ -1,4 +1,5 @@
 import asyncio
+import json
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -49,8 +50,48 @@ def login(request):
 
 @api_view(["POST"])
 def create_playlist(request):
-    token = request.data.token
-    user_id = request.data.user_id
+    token = request.data.get("token")
+    user_id = request.data.get("user_id")
+    playlist_name = request.data.get("playlist_name")
+    playlist_description = request.data.get("description")
+    songs = request.data.get("songs")
+
+    payload = json.dumps({
+        "name": playlist_name,
+        "description": playlist_description,
+        "public": False
+    })
+
+    headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {token}',
+    }
+
+    response = requests.request(
+        "POST", f"https://api.spotify.com/v1/users/{user_id}/playlists", headers=headers, data=payload)
+
+    if not response:
+        return Response(data="Could not create a playlist", status=502)
+
+    info = response.json()
+    playlist_id = info["id"]
+
+    songs = songs.replace(":", "%3A")
+    songs = songs.replace(",", "%2C")
+
+    headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {token}',
+    }
+
+    response = requests.request(
+        "POST", f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks?uris={songs}", headers=headers, data={})
+    if not response:
+        print(response.text)
+        return Response("failure", 502)
+    return Response("success", 200)
 
 
 @api_view(["POST"])

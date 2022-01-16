@@ -22,5 +22,6 @@ urlpatterns = [
     path('api/', views.dummy),
     path('api/dummy-get/<int:num>/', views.dummy_get),
     path('api/dummy-post/', views.dummy_post),
-    path('api/songs/', views.get_songs)
+    path('api/songs/', views.get_songs),
+    path('api/create_playlist/', views.create_playlist)
 ]
