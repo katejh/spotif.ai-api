@@ -1,5 +1,6 @@
 import requests
 from rest_framework.response import Response
+import logging
 
 class Song:
     def __init__(self, data: dict):
@@ -16,7 +17,7 @@ class Song:
         self.album_image_url = data["album"]["images"][0]["url"]
         self.uri = data["uri"]
 
-    def json(self):
+    def json(self) -> dict:
         """returns dict of object data in json format
         """
 
@@ -32,13 +33,7 @@ class Song:
 
 
 def get_user_playlists(token: str):
-    """[summary]
-
-    Args:
-        token ([type]): [description]
-
-    Returns:
-        [type]: [description]
+    """ Gets all of a user's playlist, returned as [{"name": <playlist's name>, "songs":[<playlist's songs>] }]
     """
 
     headers = {
@@ -51,11 +46,10 @@ def get_user_playlists(token: str):
     response = response.json()
     
     if not response:
+        logging.warning(f"Could not get playlist of user {token}")
         return "Could not get playlists", 502
 
     information = response
-
-    # print(information)
 
     playlists = []
 
@@ -66,17 +60,17 @@ def get_user_playlists(token: str):
         song_response = requests.get(f"https://api.spotify.com/v1/playlists/{id}/tracks?market=US", headers=headers)
 
         if not song_response:
-            return Response(data="Could not get song response", status=502)
+            logging.warning(f"Could not get songs in playlist {id}")
+            return "Could not get song response", 502
 
         song_info = song_response.json()
         
         songs = []
         for item in song_info["items"]:
-            #print(item["track"]['id'])
+
             if (item["track"]["id"] == None):
                 continue
             song = Song(item["track"])
-            # print(song.name)
             songs.append(song.json())
 
         playlists.append({
@@ -99,7 +93,6 @@ def get_user_songs(token: str):
         return "Could not get songs", 502
 
     tracks_response_json = tracks_response.json()
-    # print(tracks_response_json)
 
     songs = []
 
@@ -110,6 +103,8 @@ def get_user_songs(token: str):
     return songs, 200
 
 def get_song_suggestions(token: str, seed_tracks, seed_artists):
+    """ Get's Spotify reccomended songs for the user
+    """
     headers = {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
@@ -123,7 +118,6 @@ def get_song_suggestions(token: str, seed_tracks, seed_artists):
 
     suggestions_response = requests.get("https://api.spotify.com/v1/recommendations", headers=headers, params=params)
     suggestions_response_json = suggestions_response.json()
-    # print(suggestions_response_json)
 
     songs = []
 
@@ -134,20 +128,21 @@ def get_song_suggestions(token: str, seed_tracks, seed_artists):
     return songs, 200
 
 def get_song_data(song_id: str, token: str):
-    # print(song_id)
+    """ Gets the necessary song data
+    """
     headers = {
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {token}'
     }
 
     res = requests.get(f"https://api.spotify.com/v1/tracks/{song_id}", headers=headers)
-    # print(res)
     res = res.json()
-    # print(res)
     
     return Song(res)
 
 def get_user_id(token: str):
+    """ Returns the user's id 
+    """
     headers = {
         'Accept': 'application/json',
         'Content-Type': 'application/json',

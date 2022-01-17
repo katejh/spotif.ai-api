@@ -1,4 +1,3 @@
-import asyncio
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -11,50 +10,12 @@ from .utils.scrappers import get_lyrics, clean_text
 from .utils.ml import get_similar_songs
 from .utils.helpers import get_user_playlists, get_user_songs, get_song_suggestions, get_user_id
 import json
+import logging
 
 load_dotenv()
 
-@api_view(['GET'])
-def dummy(request):
-    return Response(200)
+logging.basicConfig(level=logging.INFO)
 
-
-@api_view(['GET'])
-def dummy_get(request, num):
-    return Response(f"Input: {num}")
-
-
-@api_view(['POST'])
-def dummy_post(request):
-    prompt = request.data.get("prompt")
-    token = request.data.get("token")
-    response = f"you said {prompt} and {token}"
-    print(response)
-    
-    dummy_data = {"songs": [1,2,3,4]}
-    
-    
-    return Response(dummy_data)
-
-
-@api_view(["GET"])
-def login(request):
-
-    params = {
-        "response_type": "code",
-        "client_id": "dfda70caf6ae465a95ce18a61dc47623",
-        "redirect_url": "https://localhost:8000/login",
-        "scope": "user-read-private user-read-email",
-        "show_dialog": True
-    }
-
-    response = requests.get(url="https://accounts.spotify.com/authorize", params=params)
-
-
-@api_view(["GET"])
-def provide_auth_token(request):
-    global auth_token
-    auth_token = request.GET.get("auth_token")
 
 
 @api_view(["POST"])
@@ -62,6 +23,7 @@ def get_songs(request):
     playlists, status = get_user_playlists(request.data.get('token'))
     
     return Response(data=playlists, status=status)
+
 
 @api_view(["POST"])
 def create_playlist(request):
@@ -85,11 +47,8 @@ def create_playlist(request):
     playlists, status = get_user_playlists(token)
     user_tracks, status = get_user_songs(token)
 
-    print('did we get here')
 
-    # print(playlists)
     for playlist in playlists:
-        # print(playlist)
         for song in playlist["songs"]:
             songs.append(song)
 
@@ -97,7 +56,7 @@ def create_playlist(request):
         songs.append(track)
 
     suggestions, status = get_song_suggestions(token, seed_tracks=[random.choice(songs)["id"] for i in range(3)], seed_artists=[random.choice(songs)["artist_id"] for i in range(2)])
-    print('did we get here')
+
     for track in suggestions:
         songs.append(track)
 
@@ -119,13 +78,9 @@ def create_playlist(request):
     lyrics = []
     titles = []
 
-    print('did we get here')
     random.shuffle(songs_suggestions_weighted)
     for song in songs_suggestions_weighted:
-        # lyrics.append(get_lyrics(song["name"], song["artist_name"]))
         titles.append(song["name"])
-
-    print('did we get here')
 
     matching_indices = get_similar_songs(clean_text(phrase), titles, 1.25, limit)
 
@@ -134,6 +89,7 @@ def create_playlist(request):
 
     return Response(data=matching_songs, status=200)
 
+
 @api_view(["POST"])
 def playlist(request):
     token = request.data.get("token")
@@ -141,7 +97,6 @@ def playlist(request):
     playlist_name = request.data.get("playlist_name")
     playlist_description = request.data.get("description")
     songs = request.data.get("songs")
-    print(songs)
 
     payload = json.dumps({
         "name": playlist_name,
@@ -159,13 +114,13 @@ def playlist(request):
         "POST", f"https://api.spotify.com/v1/users/{user_id}/playlists", headers=headers, data=payload)
 
     if not response:
+        logging.warning(f"Could not create playlist. Error: {response.text}")
         return Response(data="Could not create a playlist", status=502)
-
     info = response.json()
     playlist_id = info["id"]
 
-    #songs = songs.replace(":", "%3A")
-    #songs = songs.replace(",", "%2C")
+    logging.info(f"Successfully created playlist {playlist_name}")
+
     songQuery = ",".join(songs)
 
     headers = {
@@ -177,7 +132,9 @@ def playlist(request):
     response = requests.request(
         "POST", f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks?uris={songQuery}", headers=headers, data={})
     if not response:
-        print(response.text)
+        logging.warning(f"Could not upload songs to the new playlist. Error: {response.text}")
         return Response("failure", 502)
+    
+    logging.info(f"Successfully uploaded songs to the new playlist")
     return Response("success", 200)
 

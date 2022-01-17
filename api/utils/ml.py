@@ -3,59 +3,57 @@ import requests
 import string
 import os
 from dotenv import load_dotenv
+import logging
 
 load_dotenv()
 
 def get_vector_distance(v1, v2) -> float:
+    """ Calculates Euclidean distance between the two 512-dimension vectors
+    """
     sum = 0
-    # print(v1)
-    # print(v2)
 
     for i in range(512):
         sum += (v1[0][i] - v2[0][i])**2
 
     return sqrt(sum)
 
-def convert_texts_to_vector(texts: str):
-    # print(text)
+def convert_texts_to_vector(texts: str) -> [int]:
+    """ Pings Colab endpoint to turn texts into 512-dimension unit vectors
+    """
     data = {"texts": texts}
 
     r = requests.get(os.environ.get("COLAB_SERVER_URL") + "/vector", json=data)
-    # print(r)
     r = r.json()
-    # print(r)
-
     return r["vectors"]
 
-def get_phrase_and_songs_similarity(phrase: str, song_lyrics):
-    # convert to vectors
-    phrase_vector = convert_texts_to_vector([phrase])[0]
-    lyrics_vector = convert_texts_to_vector(song_lyrics)
+def get_phrase_and_songs_similarity(phrase: str, songs: [str]) -> [int]:
+    """ Calculates the similarity between songs and the inputted phrase
+    """
 
-    # print(lyrics_vector)
+    phrase_vector = convert_texts_to_vector([phrase])[0]
+    songs_vector = convert_texts_to_vector(songs)
+
 
     distances = []
 
-    # print(phrase_vector)
-    # print(lyrics_vector)
-
-    for lyric_vector in lyrics_vector:
-        distances.append(abs(get_vector_distance(phrase_vector, lyric_vector)))
+    for vector in songs_vector:
+        distances.append(abs(get_vector_distance(phrase_vector, vector)))
 
     return distances
 
-def get_similar_songs(phrase: str, song_lyrics: str, threshold: float, limit=50):
-    print('did we get here')
+def get_similar_songs(phrase: str, songs: str, threshold: float, limit=50) -> [int]:
+    """ Uses the song_info to calculate how close each is to the phrase, the similar ones as indices
+    """
     indices = []
     count = 0
 
-    distances = get_phrase_and_songs_similarity(phrase, song_lyrics)
+    distances = get_phrase_and_songs_similarity(phrase, songs)
 
     for i in range(len(distances)):
-        print(f"checking song {i}")
+        logging.info(f"checking song {i}")
         if distances[i] <= threshold:
             indices.append(i)
-            print(f"added song {i}, {count} songs added so far")
+            logging.info(f"added song {i}, {count} songs added so far")
 
             count += 1
 
