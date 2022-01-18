@@ -2,7 +2,7 @@
 
 Type in any text, and spotif.ai analyzes your phrase and creates a Spotify playlist for you based on your phrase.
 
-Built for nwHacks 2022
+Built for nwHacks 2022 - Honorary Mention (6th place)!!
 
 This is the repo for the backend code of spotif.ai. View the frontend code [here](https://github.com/Evanyl/spotifai-front)!
 
