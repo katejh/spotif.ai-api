@@ -11,6 +11,9 @@ This is the repo for the backend code of spotif.ai. View the frontend code [here
 
 - Django/Django REST Framework
 - Tensorflow
+- FastAPI
+- Jupyter Notebook and Google Colab
+- Spotify Web API
 
 ## Setup
 
